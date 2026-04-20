@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
         update: { 
           $set: { 
             courseTitle: course.courseTitle,
+            teacherEmail: course.teacherEmail || "",
             isActive: true 
           } 
         },

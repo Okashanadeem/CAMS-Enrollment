@@ -4,6 +4,7 @@ export interface ICourse extends Document {
   courseCode: string;
   courseTitle: string;
   courseType: "Theory" | "Lab";
+  teacherEmail?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,12 @@ const CourseSchema = new Schema<ICourse>(
       type: String,
       enum: ["Theory", "Lab"],
       default: "Theory",
+    },
+    teacherEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      default: "",
     },
     isActive: {
       type: Boolean,

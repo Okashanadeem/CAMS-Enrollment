@@ -26,3 +26,13 @@ export const registrationSchema = z.object({
 });
 
 export type RegistrationFormData = z.infer<typeof registrationSchema>;
+
+export const courseSchema = z.object({
+  courseCode: z.string().min(1, "Course code is required").trim(),
+  courseTitle: z.string().min(2, "Course title is required").trim(),
+  courseType: z.enum(["Theory", "Lab"]),
+  teacherEmail: z.string().trim().toLowerCase().email("Invalid email address").optional().or(z.literal("")),
+  isActive: z.boolean().default(true),
+});
+
+export type CourseFormData = z.infer<typeof courseSchema>;

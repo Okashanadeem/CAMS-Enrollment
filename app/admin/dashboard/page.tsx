@@ -20,9 +20,11 @@ import {
   Cpu,
   Database,
   Lock,
-  ChevronRight
+  ChevronRight,
+  Edit2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import CourseEditModal from '@/components/CourseEditModal';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'students' | 'courses'>('students');
@@ -30,6 +32,11 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [resetting, setResetting] = useState(false);
+  
+  // Edit Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -63,6 +70,11 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditCourse = (course: any) => {
+    setSelectedCourse(course);
+    setIsEditModalOpen(true);
   };
 
   const handleLogout = () => {
@@ -262,6 +274,7 @@ export default function AdminDashboard() {
                       ) : (
                         <>
                           <th className="px-6 py-4 font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asset Title</th>
+                          <th className="px-6 py-4 font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">Teacher</th>
                           <th className="px-6 py-4 font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">Resource Code</th>
                           <th className="px-6 py-4 font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">Type</th>
                           <th className="px-6 py-4 font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
@@ -272,14 +285,14 @@ export default function AdminDashboard() {
                   <tbody className="divide-y divide-hq-border">
                     {loading ? (
                       <tr>
-                        <td colSpan={4} className="px-6 py-24 text-center">
+                        <td colSpan={5} className="px-6 py-24 text-center">
                           <Activity className="w-10 h-10 animate-spin mx-auto mb-4 text-hq-blue" />
                           <p className="font-mono text-[10px] text-hq-blue animate-pulse tracking-[0.5em]">BUFFERING_DATA...</p>
                         </td>
                       </tr>
                     ) : filteredData.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-6 py-24 text-center">
+                        <td colSpan={5} className="px-6 py-24 text-center">
                           <AlertCircle className="w-10 h-10 mx-auto mb-4 text-slate-700" />
                           <p className="font-mono text-[10px] text-slate-600 uppercase tracking-widest">No matching records found in central core.</p>
                         </td>
@@ -306,6 +319,7 @@ export default function AdminDashboard() {
                           ) : (
                             <>
                               <td className="px-6 py-5 font-mono text-[11px] font-bold text-white group-hover:text-hq-blue transition-colors uppercase tracking-tight">{item.courseTitle}</td>
+                              <td className="px-6 py-5 font-mono text-[10px] text-slate-400">{item.teacherEmail || 'NO_EMAIL'}</td>
                               <td className="px-6 py-5 font-mono text-[10px] text-hq-cyan font-bold">{item.courseCode}</td>
                               <td className="px-6 py-5">
                                 <span className="font-mono text-[9px] bg-white/5 border border-hq-border text-slate-400 px-2 py-1 uppercase">
@@ -325,6 +339,15 @@ export default function AdminDashboard() {
                                   </div>
                                 )}
                               </td>
+                              <td className="px-6 py-5 text-right">
+                                <button
+                                  onClick={() => handleEditCourse(item)}
+                                  className="p-2 hover:bg-hq-blue/10 text-slate-400 hover:text-hq-blue transition-all rounded"
+                                  title="EDIT ASSET"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                              </td>
                             </>
                           )}
                         </tr>
@@ -337,6 +360,13 @@ export default function AdminDashboard() {
           </div>
         </div>
       </main>
+
+      <CourseEditModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={fetchData}
+        course={selectedCourse}
+      />
     </div>
   );
 }
