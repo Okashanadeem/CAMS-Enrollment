@@ -48,6 +48,30 @@ export default function RegistrationForm() {
   const studentId = watch("studentId");
 
   useEffect(() => {
+    const fetchStudentData = async () => {
+      if (studentId && studentId.length >= 5) {
+        try {
+          const res = await fetch(`/api/students/${studentId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.fullName) setValue("name", data.fullName, { shouldValidate: true });
+            if (data.email) setValue("email", data.email, { shouldValidate: true });
+            if (data.phone) setValue("phone", data.phone, { shouldValidate: true });
+          }
+        } catch (err) {
+          console.error("Error fetching student data:", err);
+        }
+      }
+    };
+
+    const timer = setTimeout(() => {
+      fetchStudentData();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [studentId, setValue]);
+
+  useEffect(() => {
     async function fetchCourses() {
       try {
         const res = await fetch("/api/courses");
