@@ -7,8 +7,9 @@ import { registrationSchema, RegistrationFormData } from "@/lib/validations";
 import { useRouter } from "next/navigation";
 import { 
   Loader2, Check, AlertCircle, User, Hash, Mail, 
-  Phone, BookOpen, Send, Award, ArrowRight, 
-  Search, Filter, CheckCircle2, ChevronRight
+  Phone, BookOpen, ArrowRight, 
+  Search, CheckCircle2,
+  Terminal, Zap, Shield, Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -118,7 +119,7 @@ export default function RegistrationForm() {
       router.push("/success");
     } catch (err: any) {
       setError(err.message);
-      setStep(1); // Go back to first step to show error
+      setStep(1);
     } finally {
       setSubmitting(false);
     }
@@ -161,144 +162,123 @@ export default function RegistrationForm() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="relative">
-            <div className="w-16 h-16 border-4 border-blue-100 rounded-full"></div>
-            <div className="w-16 h-16 border-4 border-blue-600 rounded-full border-t-transparent animate-spin absolute top-0"></div>
-        </div>
-        <p className="mt-6 text-slate-400 font-black uppercase text-[10px] tracking-[0.3em]">Initialising CAMS Portal</p>
+        <Activity className="w-12 h-12 text-hq-blue animate-spin" />
+        <p className="mt-6 font-mono text-[10px] tracking-[0.5em] text-hq-blue animate-pulse uppercase">Initializing Core Assets...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-      {/* Progress Stepper */}
-      <div className="flex items-center justify-between mb-10 px-8">
+    <div className="max-w-3xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* User-Friendly Progress Stepper */}
+      <div className="flex items-center justify-center gap-4 md:gap-8 mb-10 px-4">
         {[1, 2, 3].map((s) => (
-          <div key={s} className="flex items-center group">
+          <div key={s} className="flex items-center gap-2">
             <div className={cn(
-              "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 font-black text-xs border-2",
-              step === s ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200 scale-110" : 
-              step > s ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-100" : 
-              "bg-white border-slate-100 text-slate-300"
+              "w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold transition-all duration-500",
+              step === s ? "border-hq-blue bg-hq-blue text-white shadow-lg shadow-hq-blue/20 scale-110" : 
+              step > s ? "border-emerald-500 bg-emerald-500 text-white" : 
+              "border-hq-border text-slate-600 bg-white/5"
             )}>
-              {step > s ? <Check className="w-5 h-5 stroke-[3]" /> : s}
+              {step > s ? <Check className="w-5 h-5" /> : s}
             </div>
-            {s < 3 && (
-              <div className={cn(
-                "w-12 md:w-24 h-1 mx-2 rounded-full transition-all duration-700",
-                step > s ? "bg-emerald-500" : "bg-slate-100"
-              )} />
-            )}
+            <span className={cn(
+               "text-[10px] md:text-xs font-bold uppercase tracking-widest hidden sm:block",
+               step === s ? "text-hq-blue" : "text-slate-500"
+            )}>
+              {s === 1 ? "Details" : s === 2 ? "Courses" : "Confirm"}
+            </span>
+            {s < 3 && <div className="w-4 h-[1px] bg-hq-border hidden sm:block" />}
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.08)] border border-slate-50 overflow-hidden">
+      <div className="glass-card rounded-2xl border border-hq-border/50 overflow-hidden relative shadow-2xl">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-hq-blue/50 via-hq-cyan/50 to-hq-blue/50" />
+        
         {/* Form Header */}
-        <div className="p-8 pb-0 text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                <Award className="w-3.5 h-3.5" />
-                <span className="text-[9px] font-black uppercase tracking-widest">Product of CAMS</span>
-            </div>
-            <div className="space-y-1">
-                <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900 leading-none">
-                    {step === 1 ? "Personal Profile" : step === 2 ? "Course Selection" : "Final Verification"}
-                </h2>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    Step {step} of 3 • Secure Enrollment
-                </p>
+        <div className="p-8 border-b border-hq-border/30 bg-white/5">
+            <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                        <User className="w-6 h-6 text-hq-blue" />
+                        {step === 1 ? "Personal Profile" : step === 2 ? "Select Courses" : "Final Review"}
+                    </h2>
+                    <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                       {step === 1 ? "Enter your official student records for identity verification." : 
+                        step === 2 ? "Search and select the courses you are currently attending." : 
+                        "Please verify your information before finalizing the synchronization."}
+                    </p>
+                </div>
             </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-8 md:p-12 pt-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-8 md:p-10 bg-slate-900/40">
             {error && (
-                <div className="mb-8 p-4 bg-rose-50 border-2 border-rose-100 rounded-2xl flex items-center text-rose-700 gap-3">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="text-xs font-bold uppercase tracking-tight">{error}</p>
+                <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center text-rose-400 gap-3">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <p className="text-xs font-bold uppercase">{error}</p>
                 </div>
             )}
 
-            {/* STEP 1: PERSONAL INFO */}
+            {/* STEP 1: IDENTITY */}
             {step === 1 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                    {/* Highlighted Notice */}
-                    <div className="bg-slate-900 p-6 rounded-3xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
-                        <div className="flex gap-4 relative z-10">
-                            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-                                <AlertCircle className="w-5 h-5 text-white" />
-                            </div>
-                            <p className="text-[11px] font-bold leading-relaxed text-slate-300 uppercase tracking-tight">
-                                <span className="text-white font-black block mb-1">Important Requirement:</span>
-                                Use the actual name and ID provided to the University. This identity will be verified across all academic records.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Input Component Factory */}
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-2 duration-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
                         {[
-                            { id: "name", label: "Full Name", icon: User, placeholder: "Okasha Nadeem" },
-                            { id: "studentId", label: "Student ID", icon: Hash, placeholder: "BSE-25F-086", extraClass: "uppercase placeholder:normal-case" },
-                            { id: "email", label: "Email Address", icon: Mail, placeholder: "okasha@example.com", type: "email" },
-                            { id: "phone", label: "Phone Number", icon: Phone, placeholder: "0300-1234567" },
+                            { id: "name", label: "Legal Full Name", icon: User, placeholder: "Okasha Nadeem" },
+                            { id: "studentId", label: "Student ID", icon: Hash, placeholder: "BSE-XXX-XXX" },
+                            { id: "email", label: "Email Address", icon: Mail, placeholder: "name@example.com", type: "email" },
+                            { id: "phone", label: "Phone Number", icon: Phone, placeholder: "03XX-XXXXXXX" },
                         ].map((field) => (
                             <div key={field.id} className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
-                                    <field.icon className="w-3 h-3 text-blue-500" /> {field.label}
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
+                                    <field.icon className="w-3 h-3 text-hq-blue" /> {field.label}
                                 </label>
                                 <div className="relative group">
                                     <input
                                         {...register(field.id as any)}
                                         type={field.type || "text"}
                                         className={cn(
-                                            "w-full p-4 bg-slate-50 border-2 rounded-2xl focus:bg-white outline-none transition-all font-bold text-sm text-slate-900 placeholder:text-slate-400 shadow-sm",
-                                            errors[field.id as keyof typeof errors] ? "border-rose-200 focus:border-rose-500" : "border-slate-100 focus:border-blue-600"
+                                            "w-full bg-slate-950/50 border border-hq-border/50 px-5 py-4 rounded-xl text-white placeholder:text-slate-700 outline-none transition-all focus:border-hq-blue/50 focus:bg-slate-950 shadow-inner",
+                                            errors[field.id as keyof typeof errors] ? "border-rose-500/30" : "border-hq-border/50"
                                         )}
                                         placeholder={field.placeholder}
                                     />
-                                    {touchedFields[field.id as keyof typeof touchedFields] && !errors[field.id as keyof typeof errors] && (
-                                        <div className="absolute right-4 top-4 text-emerald-500 animate-in zoom-in duration-300">
-                                            <CheckCircle2 className="w-5 h-5" />
-                                        </div>
+                                    {errors[field.id as keyof typeof errors] && (
+                                        <p className="text-[10px] text-rose-500 font-bold mt-1.5 ml-1 animate-pulse italic">
+                                            {errors[field.id as keyof typeof errors]?.message as string}
+                                        </p>
                                     )}
                                 </div>
-                                {errors[field.id as keyof typeof errors] && (
-                                    <p className="text-[10px] text-rose-500 font-bold ml-1 animate-in slide-in-from-top-1">
-                                        {errors[field.id as keyof typeof errors]?.message as string}
-                                    </p>
-                                )}
                             </div>
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* STEP 2: COURSE SELECTION */}
+            {/* STEP 2: COURSES */}
             {step === 2 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50 p-4 rounded-3xl border border-slate-100">
-                        <div className="relative w-full md:max-w-xs">
-                            <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
+                    <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-slate-950/50 p-4 rounded-2xl border border-hq-border/30">
+                        <div className="relative w-full sm:max-w-sm">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                             <input 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 bg-white border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-600 font-bold text-xs transition-all"
-                                placeholder="Search by Code or Title..."
+                                className="w-full bg-slate-900 border border-hq-border/50 rounded-xl pl-12 pr-4 py-3 text-sm text-white outline-none focus:border-hq-blue/50 shadow-inner"
+                                placeholder="Search Courses..."
                             />
                         </div>
-                        <div className="flex items-center gap-2">
-                             <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest bg-white px-4 py-3 rounded-2xl border border-slate-100 shadow-sm">
-                                {selectedCourses.length} Courses Selected
-                             </span>
+                        <div className="font-bold text-xs text-hq-blue uppercase tracking-widest bg-hq-blue/10 px-4 py-3 rounded-xl border border-hq-blue/20">
+                            {selectedCourses.length} Selected
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar">
+                    <div className="grid grid-cols-1 gap-3 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
                         {filteredCourses.length === 0 ? (
-                            <div className="text-center py-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                                <p className="text-xs font-black uppercase text-slate-400 tracking-widest">No courses found matching your search</p>
+                            <div className="text-center py-20 border-2 border-dashed border-hq-border/30 rounded-2xl">
+                                <p className="text-slate-500 font-bold text-sm uppercase">No courses found</p>
                             </div>
                         ) : filteredCourses.map((course) => {
                             const isSelected = selectedCourses.some(
@@ -309,95 +289,86 @@ export default function RegistrationForm() {
                                     key={course._id}
                                     onClick={() => toggleCourse(course)}
                                     className={cn(
-                                        "flex items-center justify-between p-5 rounded-3xl border-2 transition-all duration-300 cursor-pointer group",
+                                        "flex items-center justify-between p-5 rounded-2xl border-2 transition-all cursor-pointer group",
                                         isSelected 
-                                        ? "border-blue-600 bg-blue-50/50 shadow-lg shadow-blue-900/5 scale-[1.02]" 
-                                        : "border-slate-50 bg-slate-50/30 hover:border-slate-200"
+                                        ? "border-hq-blue bg-hq-blue/10 shadow-lg shadow-hq-blue/5 scale-[1.01]" 
+                                        : "border-hq-border/30 bg-white/5 hover:border-slate-700 hover:bg-white/10"
                                     )}
                                 >
-                                    <div className="flex flex-col">
-                                        <span className={cn(
-                                            "text-sm font-black uppercase tracking-tight transition-colors",
-                                            isSelected ? "text-blue-900" : "text-slate-800 group-hover:text-blue-600"
-                                        )}>
+                                    <div className="space-y-1">
+                                        <p className="font-bold text-sm text-white uppercase tracking-tight group-hover:text-hq-blue transition-colors">
                                             {course.courseTitle}
-                                        </span>
-                                        <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="text-[9px] font-black bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm text-slate-500">
+                                        </p>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[10px] font-bold text-slate-500 border border-hq-border/50 px-2 py-0.5 rounded-lg bg-slate-950">
                                                 {course.courseCode}
                                             </span>
                                             <div className={cn(
-                                                "w-1 h-1 rounded-full",
-                                                course.courseType === 'Lab' ? "bg-amber-400" : "bg-indigo-400"
+                                                "w-1.5 h-1.5 rounded-full",
+                                                course.courseType === 'Lab' ? "bg-hq-cyan" : "bg-hq-blue"
                                             )}></div>
                                             <span className={cn(
-                                                "text-[9px] font-black uppercase tracking-[0.1em]",
-                                                course.courseType === 'Lab' ? "text-amber-600" : "text-indigo-600"
+                                                "text-[10px] font-bold uppercase tracking-widest",
+                                                course.courseType === 'Lab' ? "text-hq-cyan" : "text-slate-400"
                                             )}>{course.courseType}</span>
                                         </div>
                                     </div>
                                     <div className={cn(
-                                        "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-500",
-                                        isSelected ? "bg-blue-600 rotate-[360deg] shadow-lg shadow-blue-300" : "bg-white border-2 border-slate-100 group-hover:border-blue-200"
+                                        "w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all",
+                                        isSelected ? "border-hq-blue bg-hq-blue text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]" : "border-hq-border text-transparent"
                                     )}>
-                                        {isSelected && <Check className="w-4 h-4 text-white stroke-[3]" />}
+                                        <Check className="w-5 h-5 stroke-[3]" />
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
-                    {errors.enrolledCourses && <p className="text-[10px] text-rose-500 font-bold ml-2 italic">{errors.enrolledCourses.message}</p>}
                 </div>
             )}
 
-            {/* STEP 3: VERIFICATION */}
+            {/* STEP 3: FINAL REVIEW */}
             {step === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                    <div className="text-center bg-blue-50 p-8 rounded-[2rem] border-2 border-blue-100 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600 rounded-full -mr-12 -mt-12 blur-xl"></div>
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-2 duration-300">
+                    <div className="border border-hq-blue/30 bg-hq-blue/10 p-10 rounded-2xl text-center relative overflow-hidden shadow-inner">
+                        <div className="absolute top-0 right-0 p-4">
+                           <Shield className="w-16 h-16 text-hq-blue/5" />
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 mb-2">Registration Summary</p>
-                        <h3 className="text-2xl font-black text-blue-900 uppercase tracking-tighter">{studentName}</h3>
-                        <p className="text-xs font-bold text-blue-600 mt-1 uppercase tracking-widest">{studentId}</p>
+                        <p className="text-[10px] font-bold text-hq-blue uppercase tracking-[0.4em] mb-3">System Identity Profile</p>
+                        <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{studentName}</h3>
+                        <p className="text-xs font-bold text-slate-400 mt-2 uppercase tracking-widest">{studentId}</p>
                     </div>
 
                     <div className="space-y-4">
-                         <div className="flex items-center gap-2 mb-4 px-2">
-                             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Enrolling in {selectedCourses.length} Courses</span>
-                         </div>
-                         <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-l-4 border-hq-blue pl-4 mb-4">Course Manifest ({selectedCourses.length} Units)</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {selectedCourses.map((c, i) => (
-                                <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-[10px] font-black text-blue-600">
-                                            {i + 1}
-                                        </div>
-                                        <span className="text-[11px] font-black uppercase text-slate-700 tracking-tight">{c.courseTitle}</span>
+                                <div key={i} className="flex items-center justify-between p-4 bg-white/5 border border-hq-border/50 rounded-xl group hover:border-hq-blue/30 transition-all">
+                                    <div className="flex flex-col">
+                                        <span className="text-xs font-bold text-white uppercase group-hover:text-hq-blue transition-colors truncate max-w-[200px]">{c.courseTitle}</span>
+                                        <span className="text-[10px] text-slate-500 font-mono mt-0.5">{c.courseCode}</span>
                                     </div>
-                                    <span className="text-[9px] font-black text-slate-400">{c.courseCode}</span>
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500/50" />
                                 </div>
                             ))}
-                         </div>
+                        </div>
                     </div>
 
-                    <div className="flex items-start gap-4 p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                        <Checkbox className="mt-1" defaultChecked id="terms" />
-                        <label htmlFor="terms" className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase tracking-tight cursor-pointer">
-                            I verify that all information provided is accurate and I understand that these courses will be added to my official CAMS attendance roster.
-                        </label>
+                    <div className="flex items-start gap-4 p-6 bg-slate-950/80 rounded-2xl border border-hq-border/30">
+                        <input type="checkbox" defaultChecked className="mt-1 w-5 h-5 bg-slate-900 border-hq-border/50 text-hq-blue rounded cursor-pointer" />
+                        <p className="text-[11px] font-medium text-slate-400 leading-relaxed uppercase tracking-tight">
+                            I verify that all information provided is accurate and authorized for synchronization with the central attendance core.
+                        </p>
                     </div>
                 </div>
             )}
 
-            {/* Navigation Controls */}
-            <div className="flex items-center gap-4 mt-12">
+            {/* Controls */}
+            <div className="flex items-center gap-5 mt-12">
                 {step > 1 && (
                     <button
                         type="button"
                         onClick={prevStep}
-                        className="flex-1 py-5 bg-white border-2 border-slate-100 hover:border-slate-300 text-slate-500 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-[0.98]"
+                        className="flex-1 py-5 border border-hq-border/50 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-all rounded-xl active:scale-95"
                     >
                         Go Back
                     </button>
@@ -407,21 +378,21 @@ export default function RegistrationForm() {
                     <button
                         type="button"
                         onClick={nextStep}
-                        className="flex-[2] py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl shadow-blue-100 active:scale-[0.98] flex items-center justify-center gap-3 border-b-4 border-blue-800"
+                        className="flex-[2] py-5 bg-hq-blue text-white font-bold text-xs uppercase tracking-widest hover:bg-hq-blue/90 transition-all flex items-center justify-center gap-3 rounded-xl shadow-lg shadow-hq-blue/20 active:scale-95 group"
                     >
-                        Continue to Step {step + 1}
-                        <ArrowRight className="w-4 h-4" />
+                        Next: {step === 1 ? "Course Selection" : "Final Review"}
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </button>
                 ) : (
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="flex-[2] py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl shadow-blue-100 active:scale-[0.98] flex items-center justify-center gap-3 border-b-4 border-blue-800"
+                        className="flex-[2] py-5 bg-hq-blue text-white font-bold text-xs uppercase tracking-widest hover:bg-hq-blue/90 transition-all flex items-center justify-center gap-3 rounded-xl shadow-lg shadow-hq-blue/30 active:scale-95 group"
                     >
-                        {submitting ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : (
+                        {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                             <>
-                                <CheckCircle2 className="w-4 h-4" />
-                                Submit Registration
+                                <Zap className="w-5 h-5 fill-white" />
+                                Execute Sync
                             </>
                         )}
                     </button>
@@ -429,22 +400,10 @@ export default function RegistrationForm() {
             </div>
         </form>
 
-        <div className="p-8 bg-slate-950 text-white text-center relative">
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40">Academic Records Management Ecosystem</p>
+        <div className="p-4 bg-hq-blue/5 text-center border-t border-hq-border/30">
+            <p className="font-mono text-[8px] text-hq-blue/70 uppercase tracking-[0.5em] animate-pulse">CONNECTION SECURE // HQ CORE v2.0</p>
         </div>
       </div>
     </div>
   );
-}
-
-// Simple internal checkbox if shadcn not installed
-function Checkbox({ className, id, defaultChecked }: any) {
-    return (
-        <input 
-            type="checkbox" 
-            id={id}
-            defaultChecked={defaultChecked}
-            className={cn("w-5 h-5 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500", className)} 
-        />
-    );
 }
