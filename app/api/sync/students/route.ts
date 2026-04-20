@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Student from "@/models/Student";
 
+export async function GET(req: NextRequest) {
+  try {
+    const apiKey = req.headers.get("x-api-key");
+    if (apiKey !== process.env.SYNC_API_KEY) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await dbConnect();
+    const students = await Student.find({ isActive: true }).sort({ studentId: 1 });
+    
+    return NextResponse.json(students);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     console.log("[Sync API] Received student sync request");

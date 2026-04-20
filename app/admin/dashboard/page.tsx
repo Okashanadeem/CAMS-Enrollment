@@ -37,16 +37,11 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const endpoint = activeTab === 'students' 
-        ? '/api/sync/registrations' 
+        ? '/api/sync/students' 
         : '/api/courses';
       
       const headers: any = {};
-      if (activeTab === 'students') {
-        // This endpoint requires SYNC_API_KEY if we hit it from outside, 
-        // but here we are on the same origin. 
-        // However, the route.ts checks for the header.
-        // We'll need to handle authorization for these internal fetches or provide the key.
-        // Let's assume for now the admin is authorized.
+      if (activeTab === 'students' || activeTab === 'courses') {
         headers['x-api-key'] = 'cams_sync_8f2d3e4a5b6c7d8e9f0a1b2c3d4e5f6g'; // Default sync key
       }
 
@@ -100,7 +95,7 @@ export default function AdminDashboard() {
     if (!item) return false;
     const searchLower = search.toLowerCase();
     if (activeTab === 'students') {
-      return (item.name?.toLowerCase() || '').includes(searchLower) || 
+      return (item.fullName?.toLowerCase() || item.name?.toLowerCase() || '').includes(searchLower) || 
              (item.studentId?.toLowerCase() || '').includes(searchLower);
     } else {
       return (item.courseTitle?.toLowerCase() || '').includes(searchLower) || 
@@ -187,8 +182,8 @@ export default function AdminDashboard() {
                         <>
                           <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Student</th>
                           <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">ID</th>
-                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Course Code</th>
-                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Submitted</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Phone</th>
+                          <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Synced At</th>
                         </>
                       ) : (
                         <>
@@ -220,7 +215,7 @@ export default function AdminDashboard() {
                           {activeTab === 'students' ? (
                             <>
                               <td className="px-6 py-4">
-                                <div className="font-semibold text-slate-700">{item.name}</div>
+                                <div className="font-semibold text-slate-700">{item.fullName || item.name}</div>
                                 <div className="text-xs text-slate-500">{item.email}</div>
                               </td>
                               <td className="px-6 py-4">
@@ -228,9 +223,9 @@ export default function AdminDashboard() {
                                   {item.studentId}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 text-slate-600 text-sm font-mono">{item.courseCode}</td>
+                              <td className="px-6 py-4 text-slate-600 text-sm">{item.phone || 'N/A'}</td>
                               <td className="px-6 py-4 text-slate-500 text-xs">
-                                {new Date(item.submittedAt).toLocaleString()}
+                                {new Date(item.createdAt || item.submittedAt).toLocaleString()}
                               </td>
                             </>
                           ) : (
