@@ -26,13 +26,13 @@ export async function POST(req: NextRequest) {
     console.log("[Sync API] Connected to database");
 
     // Strategy: Upsert students based on studentId
-    const operations = students.map((student: any) => {
-      if (!student.studentId) {
-        console.warn(`[Sync API] Student missing ID: ${JSON.stringify(student)}`);
-      }
+    const validStudents = students.filter((s: any) => s.studentId);
+    console.log(`[Sync API] Processing ${validStudents.length} valid students`);
+
+    const operations = validStudents.map((student: any) => {
       return {
         updateOne: {
-          filter: { studentId: student.studentId?.toUpperCase() },
+          filter: { studentId: student.studentId.toUpperCase() },
           update: { 
             $set: { 
               fullName: student.fullName,

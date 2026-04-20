@@ -4,10 +4,10 @@ import Student from "@/models/Student";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     await dbConnect();
 
     const student = await Student.findOne({ 
