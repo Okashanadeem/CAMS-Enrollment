@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 import QRCode from 'qrcode';
 import path from 'path';
 import fs from 'fs';
@@ -323,22 +323,19 @@ export async function generateStudentCard(studentName: string, studentId: string
   try {
     // For Vercel/Serverless
     if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-      // Configure chromium
-      (chromium as any).setGraphicsMode = false;
-      
-      const executablePath = await chromium.executablePath();
+      const executablePath = await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar');
       browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: { width: 794, height: 1123 },
         executablePath: executablePath,
-        headless: (chromium as any).headless,
+        headless: chromium.headless,
       });
     } else {
       // Local development
       browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: process.env.CHROME_PATH || undefined // Let puppeteer find it naturally locally
+        executablePath: process.env.CHROME_PATH || undefined
       });
     }
   } catch (error: any) {

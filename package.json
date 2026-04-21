@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@sparticuz/chromium": "^143.0.4",
+    "@sparticuz/chromium-min": "^131.0.1",
     "@types/nodemailer": "^8.0.0",
     "@types/qrcode": "^1.5.6",
     "clsx": "^2.1.1",
