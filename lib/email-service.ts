@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-export async function sendWelcomeEmail(to: string, studentName: string, attachmentBuffer: Buffer) {
+export async function sendWelcomeEmail(to: string, studentName: string, studentId: string, attachmentBuffer: Uint8Array) {
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -12,32 +12,29 @@ export async function sendWelcomeEmail(to: string, studentName: string, attachme
   });
 
   const mailOptions = {
-    from: `"SMIU CAMS" <${process.env.EMAIL_FROM}>`,
+    from: `"CAMS Portal" <${process.env.EMAIL_FROM}>`,
     to: to,
-    subject: 'Welcome to SMIU CAMS - Your Student Attendance Card',
+    subject: `CAMS Registration Successful - ${studentId}`,
     html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color: #1b4d3e;">Welcome to SMIU Department of Software Engineering!</h2>
-        <p>Dear <strong>${studentName}</strong>,</p>
-        <p>We are excited to have you join our section. Your registration in the CAMS (Course Attendance Management System) has been successfully completed.</p>
-        <p>Attached to this email is your <strong>Digital Attendance Card</strong>. Please keep this card safe as it will be used for all academic and other activities handled through the CAMS system.</p>
-        <p>Key Information:</p>
-        <ul>
-          <li>All attendance will be marked using the QR code on your card.</li>
-          <li>Academic schedules and activity updates will be sent to this email.</li>
-          <li>Ensure you have your card (digital or printed) during all class sessions.</li>
-        </ul>
-        <p>We wish you the best of luck in your academic journey at SMIU!</p>
-        <br>
-        <p>Best Regards,<br><strong>SMIU CAMS Administration</strong></p>
-        <hr>
-        <p style="font-size: 0.8em; color: #777;">This is an automated message, please do not reply directly to this email.</p>
+      <div style="font-family: sans-serif; line-height: 1.5; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px;">
+        <h2 style="color: #2563eb; margin-top: 0;">Registration Successful</h2>
+        <p>Hello <strong>${studentName}</strong> (${studentId}),</p>
+        
+        <p>Your registration in <strong>CAMS</strong> is complete. This is a class-based system managed by <strong>CR Okasha Nadeem</strong> to serve as the main hub for our academic activities.</p>
+        
+        <p>Your <strong>Attendance Card</strong> is attached. You may use this to mark attendance via QR code if requested by the course teacher.</p>
+        
+        <p style="margin-bottom: 0;">Best Regards,</p>
+        <p style="margin-top: 4px;"><strong>CAMS Admin</strong></p>
+        
+        <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;">
+        <p style="font-size: 11px; color: #94a3b8;">This is an automated verification for CAMS Enrollment.</p>
       </div>
     `,
     attachments: [
       {
-        filename: `SMIU_Attendance_Card_${studentName.replace(/\s+/g, '_')}.pdf`,
-        content: attachmentBuffer,
+        filename: `Attendance_Card_${studentId}.pdf`,
+        content: Buffer.from(attachmentBuffer),
         contentType: 'application/pdf',
       },
     ],

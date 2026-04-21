@@ -52,7 +52,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const endpoint = activeTab === 'students' 
-        ? '/api/sync/students' 
+        ? '/api/sync/registrations' 
         : '/api/courses';
       
       const headers: any = {};

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
-import Student from "@/models/Student";
 import { generateStudentCard } from "@/lib/card-generator";
 import { sendWelcomeEmail } from "@/lib/email-service";
 
@@ -29,19 +28,6 @@ export async function POST(req: NextRequest) {
       studentId,
     });
 
-    // 3. Also create/update the Student record in the main registry
-    // This ensures they are now officially part of the CAMS Registry
-    await Student.findOneAndUpdate(
-      { studentId },
-      { 
-        fullName: data.name, 
-        email: data.email,
-        phone: data.phone,
-        isRegistered: true 
-      },
-      { upsert: true, new: true }
-    );
-
     // Background process: Generate card and send email
     // We don't await this to avoid delaying the response to the user
     // However, for debugging purposes, you might want to await it or log errors
@@ -50,7 +36,7 @@ export async function POST(req: NextRequest) {
         console.log(`Generating card for ${data.name} (${studentId})...`);
         const cardBuffer = await generateStudentCard(data.name, studentId);
         console.log(`Sending welcome email to ${data.email}...`);
-        await sendWelcomeEmail(data.email, data.name, cardBuffer);
+        await sendWelcomeEmail(data.email, data.name, studentId, cardBuffer);
         console.log(`Welcome email sent successfully to ${data.email}`);
       } catch (err) {
         console.error("Error in background card/email process:", err);
