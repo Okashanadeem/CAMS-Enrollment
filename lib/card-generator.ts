@@ -324,8 +324,7 @@ export async function generateStudentCard(studentName: string, studentId: string
     // For Vercel/Serverless
     if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
       // Configure chromium
-      chromium.setGraphicsMode = false;
-      chromium.setHeadlessMode = true;
+      (chromium as any).setGraphicsMode = false;
       
       const executablePath = await chromium.executablePath();
       browser = await puppeteer.launch({
