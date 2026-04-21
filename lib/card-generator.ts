@@ -321,22 +321,26 @@ export async function generateStudentCard(studentName: string, studentId: string
 
   let browser;
   try {
-    const executablePath = await chromium.executablePath();
-    
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: { width: 794, height: 1123 }, // Set default viewport to A4
-      executablePath: executablePath,
-      headless: 'shell', // Use 'shell' for production chromium
-    });
+    // For Vercel/Serverless
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      const executablePath = await chromium.executablePath();
+      browser = await puppeteer.launch({
+        args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+        defaultViewport: { width: 794, height: 1123 },
+        executablePath: executablePath,
+        headless: 'shell',
+      });
+    } else {
+      // Local development
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath: process.env.CHROME_PATH || undefined // Let puppeteer find it naturally locally
+      });
+    }
   } catch (error) {
-    console.error("Failed to launch chromium with @sparticuz/chromium, falling back to local:", error);
-    // Fallback for local development
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-    });
+    console.error("Browser launch failed:", error);
+    throw new Error(`Failed to launch browser: ${error.message}`);
   }
 
   const page = await browser.newPage();
