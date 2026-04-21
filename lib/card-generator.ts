@@ -331,7 +331,7 @@ export async function generateStudentCard(studentName: string, studentId: string
         args: chromium.args,
         defaultViewport: { width: 794, height: 1123 },
         executablePath: executablePath,
-        headless: chromium.headless,
+        headless: (chromium as any).headless,
       });
     } else {
       // Local development
