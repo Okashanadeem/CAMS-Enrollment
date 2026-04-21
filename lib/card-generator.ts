@@ -323,12 +323,16 @@ export async function generateStudentCard(studentName: string, studentId: string
   try {
     // For Vercel/Serverless
     if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      // Configure chromium
+      chromium.setGraphicsMode = false;
+      chromium.setHeadlessMode = true;
+      
       const executablePath = await chromium.executablePath();
       browser = await puppeteer.launch({
-        args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+        args: chromium.args,
         defaultViewport: { width: 794, height: 1123 },
         executablePath: executablePath,
-        headless: 'shell',
+        headless: chromium.headless,
       });
     } else {
       // Local development
