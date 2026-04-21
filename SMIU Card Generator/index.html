@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SMIU Attendance Card Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --smiu-red: #8b2323;
+      --smiu-green: #1b4d3e;
+      --accent-gold: #fbbf24;
+      --bg-gradient: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-gradient);
+      background-image: 
+        linear-gradient(rgba(27, 77, 62, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(27, 77, 62, 0.03) 1px, transparent 1px),
+        var(--bg-gradient);
+      background-size: 20px 20px, 20px 20px, 100% 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: #1f2937;
+    }
+
+    .app {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      padding: 40px;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+        0 2px 4px -1px rgba(0, 0, 0, 0.06),
+        0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .header-section {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    h2 {
+      background: linear-gradient(to right, var(--smiu-green), var(--smiu-red));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .input-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 18px;
+      transition: color 0.3s ease;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 16px 20px 16px 48px;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      font-size: 16px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #f9fafb;
+      font-family: 'JetBrains Mono', monospace;
+      color: #111827;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--smiu-green);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(27, 77, 62, 0.1);
+    }
+
+    input:focus + .input-icon {
+      color: var(--smiu-green);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-generate {
+      background: var(--smiu-green);
+      color: white;
+      grid-column: span 2;
+    }
+
+    .btn-generate:hover {
+      background: #143d30;
+      transform: translateY(-1px);
+    }
+
+    .btn-download {
+      background: white;
+      color: var(--smiu-red);
+      border: 2px solid var(--smiu-red);
+      display: none;
+    }
+
+    .btn-download:hover {
+      background: var(--smiu-red);
+      color: white;
+    }
+
+    .bulk-section {
+      margin-top: -10px; 
+      border-top: 1px dashed #e5e7eb; 
+      padding-top: 25px;
+    }
+
+    .btn-bulk {
+      background: #4f46e5;
+      color: white;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    
+    .btn-bulk:hover {
+      background: #4338ca;
+      transform: translateY(-1px);
+    }
+
+    .btn-bulk:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-bulk-dl {
+      background: #111827;
+      color: white;
+      width: 100%;
+      display: none;
+    }
+
+    .btn-bulk-dl:hover {
+      background: black;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: #e5e7eb;
+      border-radius: 999px;
+      height: 6px;
+      margin-top: 15px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #4f46e5, #818cf8);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .card-wrapper {
+      display: none;
+      margin-top: 40px;
+    }
+
+    .card-wrapper.show-animation {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .preview-label {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 10px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+
+    .card-container {
+      width: 380px;
+      margin: 0 auto;
+    }
+
+    .card {
+      width: 380px;
+      height: 240px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .front {
+      background: linear-gradient(120deg, var(--smiu-green) 0%, #0d2e23 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .front::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, var(--smiu-red), transparent);
+      border-radius: 50%;
+      opacity: 0.6;
+      filter: blur(40px);
+    }
+
+    .front::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: -30px;
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #fbbf24, transparent);
+      border-radius: 50%;
+      opacity: 0.15;
+      filter: blur(30px);
+    }
+
+    .glass-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+      z-index: 1;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 25px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-logo {
+      height: 45px;
+      width: 45px;
+      object-fit: contain;
+      background: white;
+      border-radius: 10px;
+      padding: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .uni-name h3 {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .uni-name span {
+      font-size: 9px;
+      opacity: 0.8;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .card-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .student-info {
+      flex: 1;
+    }
+
+    .info-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .student-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 8px;
+    }
+
+    .student-name {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .course-tag {
+      display: inline-block;
+      padding: 5px 12px;
+      background: rgba(251, 191, 36, 0.9);
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #1f2937;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-box {
+      background: white;
+      padding: 10px;
+      border-radius: 14px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      margin-top: -35px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 12px;
+      margin-top: auto;
+    }
+
+    .validity {
+      font-size: 9px;
+      opacity: 0.8;
+    }
+
+    .validity strong {
+      color: #fbbf24;
+    }
+
+    .back {
+      background: white;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      border: 2px solid var(--smiu-green);
+    }
+
+    .back-header-strip {
+      background: var(--smiu-green);
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .back-body {
+      padding: 30px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .terms-list {
+      list-style: none;
+      margin-bottom: 25px;
+    }
+
+    .terms-list li {
+      font-size: 11px;
+      color: #4b5563;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .credit-box {
+      border: 1px dashed #e5e7eb;
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: #f9fafb;
+    }
+
+    .credit-text {
+      font-size: 10px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .credit-text span {
+      color: var(--smiu-red);
+      font-weight: 700;
+    }
+
+    @media (max-width: 480px) {
+      .app { padding: 25px; }
+      .card-container, .card {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1.586; 
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header-section">
+    <h2>Department of Software Engineering</h2>
+    <p class="subtitle">Attendance Card Generator</p>
+  </div>
+
+  <div class="input-group">
+    <label for="studentName">Student Name</label>
+    <div class="input-wrapper">
+      <input id="studentName" type="text" placeholder="Enter Full Name" autocomplete="off" maxlength="50" />
+      <i class="fa-solid fa-id-card input-icon"></i>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label for="studentId">Student ID</label>
+    <div class="input-wrapper">
+      <input id="studentId" type="text" placeholder="BSE-25F-XXX" autocomplete="off" maxlength="15" />
+      <i class="fa-solid fa-user-graduate input-icon"></i>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-generate" onclick="generateCard()">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Card
+    </button>
+    <button id="downloadBtn" class="btn-download" onclick="downloadPDF()">
+      <i class="fa-solid fa-file-pdf"></i> Download PDF
+    </button>
+  </div>
+
+  <div class="bulk-section">
+    <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;" onchange="handleFileSelect(event)">
+    <button id="btnBulkGenerate" class="btn-bulk" onclick="document.getElementById('excelFileInput').click()">
+      <i class="fa-solid fa-file-excel"></i> Browse Excel File for Bulk Generate
+    </button>
+    <div id="progressContainer" class="progress-container">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+    <button id="btnDownloadAll" class="btn-bulk-dl" onclick="downloadAll()">
+      <i class="fa-solid fa-file-zipper"></i> Download All Cards (ZIP)
+    </button>
+  </div>
+
+  <div id="cardWrapper" class="card-wrapper">
+    <div class="preview-label">Live Preview</div>
+
+    <div class="card-container">
+      
+      <!-- FRONT CARD -->
+      <div class="card front">
+        <div class="glass-overlay"></div>
+        <div class="card-content">
+          <div class="card-header">
+            <div class="brand">
+              <img src="logo.png" alt="SMIU" class="card-logo">
+              <div class="uni-name">
+                <h3>SMIU</h3>
+                <span>SOFTWARE ENGINEERING</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="student-info">
+              <div class="info-label">Student Identity</div>
+              <div class="student-id" id="displayId">BSE-25F-000</div>
+              <div class="student-name" id="displayName">STUDENT NAME</div>
+            </div>
+            <div class="qr-box">
+              <div id="qrcode"></div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="course-tag">BSSE 1-B (Fall '25)</div>
+            <div class="validity">ATTENDANCE ONLY</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BACK CARD -->
+      <div class="card back">
+        <div class="back-header-strip">
+          Official Use Only
+        </div>
+        <div class="back-body">
+          <ul class="terms-list">
+            <li>• Use strictly for marking classroom attendance.</li>
+            <li>• Non-transferable property of the student.</li>
+            <li>• Proxy marking will result in strict action.</li>
+          </ul>
+
+          <div class="credit-box">
+            <div class="credit-text">
+              System Designed & Developed by<br>
+              <span>CR Okasha Nadeem</span> (BSSE 1-B)
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer style="margin-top: 30px; text-align: center; color: #9ca3af; font-size: 10px;">
+    &copy; 2025 SMI University • Class BSSE 1-B<br>
+    Verified Attendance System
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<script>
+  let generatedZip = null;
+
+  async function generateCard() {
+    const studentName = document.getElementById("studentName").value.trim().toUpperCase();
+    const studentId = document.getElementById("studentId").value.trim().toUpperCase();
+    
+    if (!studentName || !studentId) {
+      alert("Please enter both Student Name and Student ID.");
+      return;
+    }
+    
+    updateCardDisplay(studentName, studentId);
+    
+    const wrapper = document.getElementById("cardWrapper");
+    wrapper.style.display = "block";
+    wrapper.classList.add("show-animation");
+    
+    document.getElementById("downloadBtn").style.display = "inline-flex";
+    
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function updateCardDisplay(studentName, studentId) {
+    document.getElementById("displayName").innerText = studentName;
+    document.getElementById("displayId").innerText = studentId;
+
+    const qrDiv = document.getElementById("qrcode");
+    qrDiv.innerHTML = "";
+
+    new QRCode(qrDiv, {
+      text: studentId,
+      width: 95,
+      height: 95,
+      colorDark : "#000000",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+    });
+  }
+
+  function getPdfOptions(studentName, studentId) {
+    return {
+      margin: [10, 10],
+      filename: `SMIU_ID_${studentId}.pdf`,
+      image: { type: 'png', quality: 1.0 },
+      html2canvas: { 
+        scale: 4, 
+        useCORS: true, 
+        letterRendering: true,
+        allowTaint: true,
+        scrollY: 0,
+        onclone: (clonedDoc) => {
+          const wrapper = clonedDoc.getElementById('cardWrapper');
+          if (wrapper) {
+            wrapper.style.animation = 'none';
+            wrapper.style.opacity = '1';
+            wrapper.style.transform = 'none';
+          }
+        }
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+  }
+
+  function downloadPDF() {
+    const element = document.getElementById("cardWrapper");
+    const studentName = document.getElementById("displayName").innerText;
+    const studentId = document.getElementById("displayId").innerText;
+    
+    const previewLabel = element.querySelector('.preview-label');
+    const originalVisibility = previewLabel.style.visibility;
+    previewLabel.style.visibility = 'hidden';
+
+    // Remove animation class temporarily
+    element.classList.remove('show-animation');
+
+    html2pdf().set(getPdfOptions(studentName, studentId)).from(element).save().then(() => {
+      previewLabel.style.visibility = originalVisibility;
+      element.classList.add('show-animation');
+    });
+  }
+
+  async function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Reset file input for re-selection
+    event.target.value = '';
+    
+    await bulkGenerate(file);
+  }
+
+  async function bulkGenerate(file) {
+    const generateBtn = document.getElementById('btnBulkGenerate');
+    const downloadAllBtn = document.getElementById('btnDownloadAll');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const cardWrapper = document.getElementById("cardWrapper");
+    
+    const originalText = generateBtn.innerHTML;
+
+    generateBtn.disabled = true;
+    downloadAllBtn.style.display = 'none';
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer);
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+      
+      // Filter valid rows (should have both name and ID)
+      const studentData = rows
+        .map(row => ({
+          id: row[0] ? String(row[0]).trim().toUpperCase() : null,
+          name: row[1] ? String(row[1]).trim().toUpperCase() : null
+        }))
+        .filter(student => student.name && student.id);
+
+      if (studentData.length === 0) {
+        alert("No valid student data found in the Excel file. Please ensure Column A has IDs and Column B has names.");
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = originalText;
+        progressContainer.style.display = 'none';
+        return;
+      }
+
+      const zip = new JSZip();
+      const cardsFolder = zip.folder("cards");
+      
+      // Prepare UI for bulk mode
+      cardWrapper.style.display = "block";
+      cardWrapper.classList.remove('show-animation');
+      
+      const previewLabel = cardWrapper.querySelector('.preview-label');
+      previewLabel.style.visibility = 'hidden'; 
+
+      for (let i = 0; i < studentData.length; i++) {
+        const { name, id } = studentData[i];
+        
+        // Update progress
+        const percent = Math.round(((i + 1) / studentData.length) * 100);
+        generateBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing ${i + 1}/${studentData.length}`;
+        progressBar.style.width = `${percent}%`;
+
+        updateCardDisplay(name, id);
+        
+        // Wait for DOM update & QR rendering
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        const blob = await html2pdf().set(getPdfOptions(name, id)).from(cardWrapper).output('blob');
+        cardsFolder.file(`${id}.pdf`, blob);
+      }
+
+      generatedZip = zip;
+      downloadAllBtn.style.display = 'inline-flex';
+      
+      generateBtn.innerHTML = `<i class="fa-solid fa-check"></i> Complete (${studentData.length} cards)`;
+      setTimeout(() => {
+        alert(`Bulk generation complete! ${studentData.length} cards generated. Click 'Download All Cards' to save as ZIP.`);
+      }, 100);
+
+    } catch (error) {
+      console.error(error);
+      alert("Error during bulk generation: " + error.message);
+      generateBtn.innerHTML = originalText;
+      progressContainer.style.display = 'none';
+    } finally {
+      generateBtn.disabled = false;
+      const previewLabel = cardWrapper.querySelector('.preview-label');
+      if(previewLabel) previewLabel.style.visibility = 'visible';
+    }
+  }
+
+  function downloadAll() {
+    if (!generatedZip) return;
+    generatedZip.generateAsync({ type: "blob" }).then(function(content) {
+      saveAs(content, "SMIU_Attendance_Cards.zip");
+    });
+  }
+</script>
+
+</body>
+</html>

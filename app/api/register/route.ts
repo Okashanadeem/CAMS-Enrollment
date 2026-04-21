@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
 import Student from "@/models/Student";
+import { generateStudentCard } from "@/lib/card-generator";
+import { sendWelcomeEmail } from "@/lib/email-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,34 +17,45 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
-    // 1. Verify student exists in CAMS HQ (synced from local CAMS)
-    const hqStudent = await Student.findOne({ studentId });
-    if (!hqStudent) {
-      return NextResponse.json({ 
-        error: "Identity not found in CAMS Registry. Please ensure your ID is correct or contact admin." 
-      }, { status: 404 });
-    }
-
-    // 2. Verify name matches registry (basic check)
-    const registryName = (hqStudent.fullName || hqStudent.name || "").trim().toLowerCase();
-    const providedName = data.name.trim().toLowerCase();
-    
-    if (providedName !== registryName) {
-      return NextResponse.json({ 
-        error: `Identity found, but name doesn't match our records. Did you mean: ${hqStudent.fullName || hqStudent.name}?` 
-      }, { status: 400 });
-    }
-
-    // 3. Check for existing registration
+    // 1. Check for existing registration
     const existing = await Registration.findOne({ studentId });
     if (existing) {
-      return NextResponse.json({ error: "This student ID has already completed the enrollment sync." }, { status: 409 });
+      return NextResponse.json({ error: "This student ID is already registered in the CAMS system." }, { status: 409 });
     }
 
+    // 2. Create the Registration record
     const registration = await Registration.create({
       ...data,
       studentId,
     });
+
+    // 3. Also create/update the Student record in the main registry
+    // This ensures they are now officially part of the CAMS Registry
+    await Student.findOneAndUpdate(
+      { studentId },
+      { 
+        fullName: data.name, 
+        email: data.email,
+        phone: data.phone,
+        isRegistered: true 
+      },
+      { upsert: true, new: true }
+    );
+
+    // Background process: Generate card and send email
+    // We don't await this to avoid delaying the response to the user
+    // However, for debugging purposes, you might want to await it or log errors
+    (async () => {
+      try {
+        console.log(`Generating card for ${data.name} (${studentId})...`);
+        const cardBuffer = await generateStudentCard(data.name, studentId);
+        console.log(`Sending welcome email to ${data.email}...`);
+        await sendWelcomeEmail(data.email, data.name, cardBuffer);
+        console.log(`Welcome email sent successfully to ${data.email}`);
+      } catch (err) {
+        console.error("Error in background card/email process:", err);
+      }
+    })();
 
     return NextResponse.json({ success: true, registrationId: registration._id });
   } catch (error: any) {
