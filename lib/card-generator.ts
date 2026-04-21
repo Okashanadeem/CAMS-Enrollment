@@ -338,7 +338,7 @@ export async function generateStudentCard(studentName: string, studentId: string
         executablePath: process.env.CHROME_PATH || undefined // Let puppeteer find it naturally locally
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Browser launch failed:", error);
     throw new Error(`Failed to launch browser: ${error.message}`);
   }
