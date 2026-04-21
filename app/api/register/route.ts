@@ -28,20 +28,20 @@ export async function POST(req: NextRequest) {
       studentId,
     });
 
-    // Background process: Generate card and send email
-    // We don't await this to avoid delaying the response to the user
-    // However, for debugging purposes, you might want to await it or log errors
-    (async () => {
-      try {
-        console.log(`Generating card for ${data.name} (${studentId})...`);
-        const cardBuffer = await generateStudentCard(data.name, studentId);
-        console.log(`Sending welcome email to ${data.email}...`);
-        await sendWelcomeEmail(data.email, data.name, studentId, cardBuffer);
-        console.log(`Welcome email sent successfully to ${data.email}`);
-      } catch (err) {
-        console.error("Error in background card/email process:", err);
-      }
-    })();
+    // In serverless environments, we MUST await background processes 
+    // otherwise the function instance is killed before they finish.
+    try {
+      console.log(`Generating card for ${data.name} (${studentId})...`);
+      const cardBuffer = await generateStudentCard(data.name, studentId);
+      
+      console.log(`Sending welcome email to ${data.email}...`);
+      await sendWelcomeEmail(data.email, data.name, studentId, cardBuffer);
+      
+      console.log(`Welcome email sent successfully to ${data.email}`);
+    } catch (err) {
+      // we log the error but don't fail the whole request since DB record is created
+      console.error("Error in card/email process:", err);
+    }
 
     return NextResponse.json({ success: true, registrationId: registration._id });
   } catch (error: any) {

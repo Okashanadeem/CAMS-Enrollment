@@ -1,4 +1,5 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import QRCode from 'qrcode';
 import path from 'path';
 import fs from 'fs';
@@ -41,8 +42,7 @@ export async function generateStudentCard(studentName: string, studentId: string
     .card-container {
       width: 340px; /* Reduced from 380px */
       display: flex;
-      flex-direction: column;
-      gap: 30px;
+      flex-direction: column; gap: 30px;
       padding: 20px;
       align-items: center;
     }
@@ -319,14 +319,29 @@ export async function generateStudentCard(studentName: string, studentId: string
 </html>
   `;
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  let browser;
+  try {
+    const executablePath = await chromium.executablePath();
+    
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: { width: 794, height: 1123 }, // Set default viewport to A4
+      executablePath: executablePath,
+      headless: 'shell', // Use 'shell' for production chromium
+    });
+  } catch (error) {
+    console.error("Failed to launch chromium with @sparticuz/chromium, falling back to local:", error);
+    // Fallback for local development
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+    });
+  }
+
   const page = await browser.newPage();
   await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
   
-  // A4 dimensions at 96 DPI: 794x1123
   await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
 
   const pdfBuffer = await page.pdf({
