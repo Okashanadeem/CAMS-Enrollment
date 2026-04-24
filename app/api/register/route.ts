@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Registration from "@/models/Registration";
-import { generateStudentCard } from "@/lib/card-generator";
 import { sendWelcomeEmail } from "@/lib/email-service";
 
 export async function POST(req: NextRequest) {
@@ -31,16 +30,13 @@ export async function POST(req: NextRequest) {
     // In serverless environments, we MUST await background processes 
     // otherwise the function instance is killed before they finish.
     try {
-      console.log(`Generating card for ${data.name} (${studentId})...`);
-      const cardBuffer = await generateStudentCard(data.name, studentId);
-      
       console.log(`Sending welcome email to ${data.email}...`);
-      await sendWelcomeEmail(data.email, data.name, studentId, cardBuffer);
+      await sendWelcomeEmail(data.email, data.name, studentId);
       
       console.log(`Welcome email sent successfully to ${data.email}`);
     } catch (err) {
       // we log the error but don't fail the whole request since DB record is created
-      console.error("Error in card/email process:", err);
+      console.error("Error in email process:", err);
     }
 
     return NextResponse.json({ success: true, registrationId: registration._id });

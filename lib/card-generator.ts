@@ -332,11 +332,21 @@ export async function generateStudentCard(studentName: string, studentId: string
       });
     } else {
       // Local development
-      browser = await puppeteer.launch({
+      // puppeteer-core requires an executablePath or a channel.
+      // We'll try to use a channel if no path is provided.
+      const launchOptions: any = {
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: process.env.CHROME_PATH || undefined
-      });
+      };
+
+      if (process.env.CHROME_PATH) {
+        launchOptions.executablePath = process.env.CHROME_PATH;
+      } else {
+        // Try common channels if no path is provided
+        launchOptions.channel = 'chrome'; // or 'msedge'
+      }
+
+      browser = await puppeteer.launch(launchOptions);
     }
   } catch (error: any) {
     console.error("Browser launch failed:", error);

@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-export async function sendWelcomeEmail(to: string, studentName: string, studentId: string, attachmentBuffer: Uint8Array) {
+export async function sendWelcomeEmail(to: string, studentName: string, studentId: string) {
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -10,6 +10,9 @@ export async function sendWelcomeEmail(to: string, studentName: string, studentI
       pass: process.env.EMAIL_PASS,
     },
   });
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const downloadUrl = `${appUrl}/download?studentId=${encodeURIComponent(studentId)}&name=${encodeURIComponent(studentName)}`;
 
   const mailOptions = {
     from: `"CAMS Portal" <${process.env.EMAIL_FROM}>`,
@@ -22,8 +25,12 @@ export async function sendWelcomeEmail(to: string, studentName: string, studentI
         
         <p>Your registration in <strong>CAMS</strong> is complete. This is a class-based system managed by <strong>CR Okasha Nadeem</strong> to serve as the main hub for our academic activities.</p>
         
-        <p>Your <strong>Attendance Card</strong> is attached. You may use this to mark attendance via QR code if requested by the course teacher.</p>
+        <p>You can now download your <strong>Attendance Card</strong> from our portal. You may use this to mark attendance via QR code if requested by the course teacher.</p>
         
+        <div style="margin: 30px 0; text-align: center;">
+          <a href="${downloadUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Download ID Card</a>
+        </div>
+
         <p style="margin-bottom: 0;">Best Regards,</p>
         <p style="margin-top: 4px;"><strong>CAMS Admin</strong></p>
         
@@ -31,13 +38,6 @@ export async function sendWelcomeEmail(to: string, studentName: string, studentI
         <p style="font-size: 11px; color: #94a3b8;">This is an automated verification for CAMS Enrollment.</p>
       </div>
     `,
-    attachments: [
-      {
-        filename: `Attendance_Card_${studentId}.pdf`,
-        content: Buffer.from(attachmentBuffer),
-        contentType: 'application/pdf',
-      },
-    ],
   };
 
   return transporter.sendMail(mailOptions);
