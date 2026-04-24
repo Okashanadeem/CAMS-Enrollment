@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     console.log(`Generating card for ${name} (${studentId}) on demand...`);
     const cardBuffer = await generateStudentCard(name, studentId);
 
-    return new NextResponse(cardBuffer, {
+    return new NextResponse(Buffer.from(cardBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="Attendance_Card_${studentId}.pdf"`,
